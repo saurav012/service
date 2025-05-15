@@ -15,8 +15,8 @@ This Spring Boot application demonstrates how to configure and use multiple `Web
 ## Clone
 To get started you can simply clone this repository using git:
 ```
-git clone https://gitlab.cloudopsprod.aws.velocityfrequentflyer.internal/lms/airports-service.git
-cd airports-service
+git clone https://github.com/saurav012/service.git
+cd service
 ```
 
 ### Build an executable JAR
