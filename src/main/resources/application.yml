@@ -1,0 +1,24 @@
+spring:
+  application:
+    name: weather-service
+  main:
+    web-application-type: reactive
+    lazy-initialization: true
+  profiles:
+    include: local
+  jackson:
+    default-property-inclusion: non_null
+    serialization:
+      INDENT_OUTPUT: true
+server:
+  port: 8080
+  shutdown: graceful
+
+logging:
+  level:
+    root: INFO
+    org.springframework: WARN
+    com.weather.service: INFO
+    org.springframework.web: INFO
+    org.springframework.web.HttpLogging: INFO
+

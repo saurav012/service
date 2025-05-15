@@ -1,0 +1,142 @@
+openapi: 3.0.1
+info:
+  title: Melbourne Weather API
+  version: 1.0.0
+paths:
+  /api/weather/melbourne:
+    get:
+      summary: Get current weather for Melbourne
+      operationId: getMelbourneWeather
+      responses:
+        '200':
+          description: Successful response with weather data
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/WeatherResponse'
+
+components:
+  schemas:
+    WeatherResponse:
+      type: object
+      properties:
+        request:
+          $ref: '#/components/schemas/Request'
+        location:
+          $ref: '#/components/schemas/Location'
+        current:
+          $ref: '#/components/schemas/Current'
+
+    Request:
+      type: object
+      properties:
+        type:
+          type: string
+        query:
+          type: string
+        language:
+          type: string
+        unit:
+          type: string
+
+    Location:
+      type: object
+      properties:
+        name:
+          type: string
+        country:
+          type: string
+        region:
+          type: string
+        lat:
+          type: string
+        lon:
+          type: string
+        timezone_id:
+          type: string
+        localtime:
+          type: string
+        localtime_epoch:
+          type: integer
+        utc_offset:
+          type: string
+
+    Current:
+      type: object
+      properties:
+        observation_time:
+          type: string
+        temperature:
+          type: integer
+        weather_code:
+          type: integer
+        weather_icons:
+          type: array
+          items:
+            type: string
+        weather_descriptions:
+          type: array
+          items:
+            type: string
+        astro:
+          $ref: '#/components/schemas/Astro'
+        air_quality:
+          $ref: '#/components/schemas/AirQuality'
+        wind_speed:
+          type: integer
+        wind_degree:
+          type: integer
+        wind_dir:
+          type: string
+        pressure:
+          type: integer
+        precip:
+          type: number
+        humidity:
+          type: integer
+        cloudcover:
+          type: integer
+        feelslike:
+          type: integer
+        uv_index:
+          type: integer
+        visibility:
+          type: integer
+        is_day:
+          type: string
+
+    Astro:
+      type: object
+      properties:
+        sunrise:
+          type: string
+        sunset:
+          type: string
+        moonrise:
+          type: string
+        moonset:
+          type: string
+        moon_phase:
+          type: string
+        moon_illumination:
+          type: integer
+
+    AirQuality:
+      type: object
+      properties:
+        co:
+          type: string
+        no2:
+          type: string
+        o3:
+          type: string
+        so2:
+          type: string
+        pm2_5:
+          type: string
+        pm10:
+          type: string
+        us-epa-index:
+          type: string
+        gb-defra-index:
+          type: string
