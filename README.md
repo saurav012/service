@@ -29,15 +29,3 @@ Or you can build a single executable JAR file that contains all the necessary de
 mvn clean package
 ```
 
-### Build Docker image
-
-```
-mvn install dockerfile:build
-```
-
-### Run the service in a container
-```
-docker run -p 9080:9080 -t /service
-```
-
-
