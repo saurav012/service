@@ -2,6 +2,7 @@ package com.weather.service.service;
 
 import com.weather.model.WeatherResponse;
 import com.weather.service.config.ApplicationProperties;
+import com.weather.service.config.RedisConfiguration;
 import com.weather.service.config.WebConfig;
 import com.weather.service.mapper.ServiceMapper;
 import com.weather.service.model.ClimateDto;
@@ -23,22 +24,30 @@ public class ClimateService {
     public final WebConfig webConfig;
     private final WebClient weatherstackClient;
     private final WebClient openWeatherMapClient;
+    private final RedisCacheImplementation redisCacheImplementation;
 
 
-    public ClimateService(WebConfig webConfig, ServiceMapper serviceMapper, WebClient weatherstackClient, WebClient openWeatherMapClient) {
+    public ClimateService(WebConfig webConfig, ServiceMapper serviceMapper, WebClient weatherstackClient, WebClient openWeatherMapClient, RedisCacheImplementation redisCacheImplementation, RedisConfiguration redisConfiguration) {
         this.weatherstackClient = weatherstackClient;
         this.openWeatherMapClient = openWeatherMapClient;
         this.webConfig = webConfig;
         this.serviceMapper = serviceMapper;
+        this.redisCacheImplementation = redisCacheImplementation;
     }
 
-    public Mono<ClimateDto> getClimateDetails(String city) {
-        return serviceCallOne(city)
-                .map(serviceMapper::generatingFinalResponse)
-                .onErrorResume(error -> {
-                    logger.info("Primary provider failed: " + error.getMessage());
-                    return serviceCalltwo(city);
-                }).timeout(Duration.ofSeconds(10));
+    public Mono<ClimateDto> getClimateDetails(String city, String cacheControl) {
+        if (cacheControl != null && redisCacheImplementation.exists("latest")) {
+            logger.info("response from cache: {}",redisCacheImplementation.get("latest"));
+            return Mono.just(redisCacheImplementation.get("latest"))
+                    .map(serviceMapper::generatingFinalResponse).timeout(Duration.ofSeconds(10L));
+        } else {
+            return serviceCallOne(city)
+                    .map(serviceMapper::generatingFinalResponse)
+                    .onErrorResume(error -> {
+                        logger.info("Primary provider failed: {}", error.getMessage());
+                        return serviceCalltwo(city);
+                    }).timeout(Duration.ofSeconds(10));
+        }
     }
 
     /**
@@ -65,7 +74,7 @@ public class ClimateService {
         return weatherstackClient.get()
                 .uri(uriBuilder -> uriBuilder.path("/current").queryParams(queryParameter(city)).build())
                 .retrieve()
-                .bodyToMono(WeatherResponse.class).log()
+                .bodyToMono(WeatherResponse.class)
                 .doOnError(value -> Mono.error(RuntimeException::new))
                 .elapsed()
                 .doOnNext(tuple -> logger.info("Total time taken to Get Weather Call By TimeTaken::{}", tuple.getT1() + "ms"))
@@ -74,7 +83,8 @@ public class ClimateService {
                     logger.info("Failed to get data fromWeather API, Error::{}", httpStatus.getMessage());
                     throw new RuntimeException();
                 })
-                .doOnNext(weatherapi -> logger.info("Response received from Service one call for Get Weather deatils API::{}", weatherapi));
+                .doOnNext(weatherapi -> logger.info("Response received from Service one call for Get Weather deatils API::{}", weatherapi))
+                .doOnNext(redis -> redisCacheImplementation.save("latest", redis, 10L));
 
 
     }

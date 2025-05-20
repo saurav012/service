@@ -10,6 +10,11 @@ spring:
     default-property-inclusion: non_null
     serialization:
       INDENT_OUTPUT: true
+
+  data:
+    redis:
+      host: localhost
+      port: 6379
 server:
   port: 8080
   shutdown: graceful
@@ -21,4 +26,5 @@ logging:
     com.weather.service: INFO
     org.springframework.web: INFO
     org.springframework.web.HttpLogging: INFO
+
 
